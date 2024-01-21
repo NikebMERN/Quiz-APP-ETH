@@ -63,6 +63,7 @@ const Login = () => {
         formState: { errors },
     } = useForm();
     const [icon, setIcon] = useState(true);
+    const [error, setError] = useState("");
     const [onShow, setOnShow] = useState("password");
     const navigate = useNavigate();
 
@@ -81,6 +82,7 @@ const Login = () => {
                 })
                 .catch((err) => {
                     console.log(err);
+                    setError(err.response.data.error);
                 });
         } catch (error) {
             throw error;
@@ -101,6 +103,9 @@ const Login = () => {
         <LoginContainer>
             <h1>Login</h1>
             <Form onSubmit={handleSubmit(onSubmit)}>
+                <Label>
+                    Error: <ErrorMessage>{error}</ErrorMessage>
+                </Label>
                 <Label>Email:</Label>
                 <Input
                     type="email"

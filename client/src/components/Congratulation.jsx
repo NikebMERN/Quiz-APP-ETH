@@ -127,7 +127,7 @@ const Congratulation = ({
                 Congratulations! You've completed all questions in minutes.
             </CongratulationsText>
             <div>
-                <h2>Correct Questions ({correctCounts}/40):</h2>
+                <h2>Correct Questions ({correctCounts}/60):</h2>
                 <QuestionList>
                     {correctQuestion.map((question) => (
                         <QuestionItem key={question.id}>
@@ -137,7 +137,7 @@ const Congratulation = ({
                     ))}
                 </QuestionList>
 
-                <h2>Wrong Questions ({wrongCounts}/40):</h2>
+                <h2>Wrong Questions ({wrongCounts}/60):</h2>
                 <QuestionList>
                     {wrongQuestion.map((question) => (
                         <QuestionItem key={question.id}>

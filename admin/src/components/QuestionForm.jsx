@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -44,6 +44,28 @@ const QuestionFormButton = styled.button`
   }
 `;
 
+const SuggestionsList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-top: -20px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  position: absolute;
+  width: 100%;
+  background-color: #fff;
+  z-index: 1;
+`;
+
+const SuggestionItem = styled.li`
+  padding: 8px;
+  cursor: pointer;
+  &:hover {
+    background-color: #f5f5f5;
+  }
+`;
+
 const QuestionForm = () => {
     const [formData, setFormData] = useState({
         subject: "",
@@ -56,15 +78,32 @@ const QuestionForm = () => {
         },
         correctChoice: "",
     });
+    const [serverSubjects, setServerSubjects] = useState([]);
+    const [suggestions, setSuggestions] = useState([]);
     const token = localStorage.getItem("adminToken");
     const navigate = useNavigate();
-    
+
+    useEffect(() => {
+        fetchSubjects();
+    }, []);
+
+    const fetchSubjects = async () => {
+        try {
+            const response = await api.get("/api/quest/questions");
+            const uniqueSubjects = [
+                ...new Set(response.data.map((item) => item.subject)),
+            ];
+            setServerSubjects(uniqueSubjects);
+        } catch (error) {
+            console.error("Error fetching subjects:", error);
+        }
+    };
+
     const handleChange = (event) => {
         const { name, value } = event.target;
 
-        if (name.startsWith("choice")) {
-            // If the field is a choice, update the choices object
-            const choiceKey = name.slice(-1); // Extract the choice key (A, B, C, D)
+        if (name && name.includes("choice")) {
+            const choiceKey = name.slice(-1);
             setFormData({
                 ...formData,
                 choices: {
@@ -73,36 +112,40 @@ const QuestionForm = () => {
                 },
             });
         } else {
-            // If not a choice, update the form data
             setFormData({
                 ...formData,
                 [name]: value,
             });
         }
+
+        // Filter suggestions based on the input value
+        const filteredSuggestions = serverSubjects.filter((subject) =>
+            subject.toLowerCase().includes(value.toLowerCase())
+        );
+        setSuggestions(filteredSuggestions);
+    };
+
+    const handleSubjectSelect = (subject) => {
+        setFormData({
+            ...formData,
+            subject,
+        });
+        setSuggestions([]); // Clear suggestions when a subject is selected
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        console.log(formData);
 
         try {
-            // Make an API request to create or update a question
-            await api
-                .post("/api/quest/add-question", {
-                    questions: [formData],
-                    adminId: token,
-                })
-                .then((response) => {
-                    // Handle success, e.g., show a success message or redirect
-                    console.log("Question created/updated successfully:", response.data);
-                    navigate("/");
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
+            await api.post("/api/quest/add-question", {
+                questions: [formData],
+                adminId: token,
+            });
+
+            console.log("Question created/updated successfully");
+            navigate("/");
         } catch (error) {
             console.error("Error creating/updating question:", error);
-            // Handle error, e.g., show an error message
         }
     };
 
@@ -110,15 +153,28 @@ const QuestionForm = () => {
         <QuestionFormContainer>
             <QuestionFormHeader>Question Form</QuestionFormHeader>
             <form onSubmit={handleSubmit}>
-                <QuestionFormLabel>
+                <QuestionFormLabel style={{ position: "relative" }}>
                     Subject:
                     <QuestionFormInput
                         type="text"
                         name="subject"
                         value={formData.subject}
-                        onChange={(e) => handleChange(e)}
-                        required
+                        onChange={handleChange}
+                        autoComplete="off" // Disable browser autocomplete
                     />
+                    {/* Render suggestions */}
+                    {suggestions.length > 0 && (
+                        <SuggestionsList>
+                            {suggestions.map((subject) => (
+                                <SuggestionItem
+                                    key={subject}
+                                    onClick={() => handleSubjectSelect(subject)}
+                                >
+                                    {subject}
+                                </SuggestionItem>
+                            ))}
+                        </SuggestionsList>
+                    )}
                 </QuestionFormLabel>
                 <br />
                 <QuestionFormLabel>
@@ -126,7 +182,7 @@ const QuestionForm = () => {
                     <QuestionFormTextarea
                         name="question"
                         value={formData.question}
-                        onChange={(e) => handleChange(e)}
+                        onChange={handleChange}
                         required
                     />
                 </QuestionFormLabel>
@@ -134,9 +190,9 @@ const QuestionForm = () => {
 
                 {Object.entries(formData.choices).map(([choiceKey, choiceValue]) => (
                     <div key={choiceKey}>
-                        <QuestionFormLabel
-                            htmlFor={`choice${choiceKey}`}
-                        >{`Choice ${choiceKey}:`}</QuestionFormLabel>
+                        <QuestionFormLabel htmlFor={`choice${choiceKey}`}>
+                            {`Choice ${choiceKey}:`}
+                        </QuestionFormLabel>
                         <QuestionFormInput
                             type="text"
                             id={`choice${choiceKey}`}

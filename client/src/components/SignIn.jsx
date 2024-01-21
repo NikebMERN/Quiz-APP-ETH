@@ -67,7 +67,7 @@ const Registration = () => {
         handleSubmit,
         formState: { errors },
     } = useForm();
-    // const [error, setError] = useState("");
+    const [error, setError] = useState("");
     const navigate = useNavigate();
     const [icon, setIcon] = useState(true);
     const [onShow, setOnShow] = useState("password");
@@ -93,13 +93,14 @@ const Registration = () => {
                     navigate("/");
                 })
                 .catch((error) => {
-                    // setError(error);
+                    setError(error.response.data.error);
                     console.log(error);
                 });
         } catch (error) {
             throw error;
         }
     };
+    console.log(error)
 
     const show = () => {
         if (onShow === "password") {
@@ -115,8 +116,8 @@ const Registration = () => {
         <SignInContainer>
             <h1>Registration</h1>
             <Form onSubmit={handleSubmit(onSubmit)}>
-                {/* {error ? error : ""} */}
-                <Label>Email:</Label>
+                <Label>Error: <ErrorMessage>{error}</ErrorMessage></Label>
+                <Label>Email *:</Label>
                 <Input
                     type="email"
                     name="Email"
@@ -127,7 +128,7 @@ const Registration = () => {
                     <ErrorMessage role="alert">Enter E-mail!</ErrorMessage>
                 )}
 
-                <Label>Registration Number:</Label>
+                <Label>Registration Number *:</Label>
                 <Input
                     type="number"
                     name="registrationNumber"
@@ -150,7 +151,7 @@ const Registration = () => {
                     <ErrorMessage role="alert">The max length is 7!</ErrorMessage>
                 )}
 
-                <Label>Name:</Label>
+                <Label>Name *:</Label>
                 <Input
                     type="text"
                     name="name"
@@ -161,7 +162,7 @@ const Registration = () => {
                     <ErrorMessage role="alert">Enter Your Name!</ErrorMessage>
                 )}
 
-                <Label>Woreda Number:</Label>
+                <Label>Woreda Number *:</Label>
                 <Input
                     type="number"
                     name="woredaNumber"
@@ -172,7 +173,7 @@ const Registration = () => {
                     <ErrorMessage role="alert">Enter Your Woreda NO!</ErrorMessage>
                 )}
 
-                <Label>School Name:</Label>
+                <Label>School Name *:</Label>
                 <Input
                     type="text"
                     name="schoolName"
@@ -183,7 +184,7 @@ const Registration = () => {
                     <ErrorMessage role="alert">Enter Your School Name!</ErrorMessage>
                 )}
 
-                <Label>City:</Label>
+                <Label>City *:</Label>
                 <Input
                     type="text"
                     name="city"
@@ -194,7 +195,7 @@ const Registration = () => {
                     <ErrorMessage role="alert">Enter Your City Name!</ErrorMessage>
                 )}
 
-                <Label>Age:</Label>
+                <Label>Age *:</Label>
                 <Input
                     type="number"
                     name="age"
@@ -205,7 +206,7 @@ const Registration = () => {
                     <ErrorMessage role="alert">Enter Your Age!</ErrorMessage>
                 )}
 
-                <Label>Gender:</Label>
+                <Label>Gender *:</Label>
                 <Select name="gender" {...register("gender", { required: true })}>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -214,7 +215,7 @@ const Registration = () => {
                     <ErrorMessage role="alert">Enter Your Gender!</ErrorMessage>
                 )}
 
-                <Label>Password:</Label>
+                <Label>Password *:</Label>
                 <div>
                     <Input
                         type={onShow}

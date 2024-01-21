@@ -8,17 +8,21 @@ dotenv.config();
 exports.loginAdmin = (req, res) => {
     const { password } = req.body;
     // console.log(password);
-    const query = "SELECT * FROM admin"; // Assuming there is only one admin, adjust the query based on your database structure
+    const query = "SELECT * FROM admin WHERE password = ?"; // Assuming there is only one admin, adjust the query based on your database structure
 
-    db.query(query, (error, results) => {
+    db.query(query, [password], (error, results) => {
         if (error) {
             console.log(error);
             res.status(400).json({
                 message: "Error logging in",
             });
         }
-        if (results.length > 0) {
-            const admin = results[0];
+        if (results.length === 0) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+        const admin = results[0];
+        
+        if (password === admin.password) {
             const token = jwt.sign(
                 {
                     adminId: admin.id,
@@ -26,7 +30,7 @@ exports.loginAdmin = (req, res) => {
                 },
                 process.env.JWT_SECRET,
                 {
-                    expiresIn: "1h",
+                    expiresIn: "6h",
                 }
             );
             res.status(200).json({

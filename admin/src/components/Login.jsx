@@ -58,6 +58,7 @@ const Login = () => {
   } = useForm();
   const navigate = useNavigate();
   const [icon, setIcon] = useState(true);
+  const [err, setErr] = useState("");
   const [onShow, setOnShow] = useState("password");
 
   const onSubmit = async (data) => {
@@ -77,6 +78,7 @@ const Login = () => {
         })
         .catch((err) => {
           console.error(err);
+          setErr(err.response.data.error);
         });
     } catch (error) {
       console.error("Login error:", error);
@@ -98,6 +100,7 @@ const Login = () => {
     <LoginContainer>
       <LoginHeader>Admin Login</LoginHeader>
       <LoginForm onSubmit={handleSubmit(onSubmit)}>
+      Error: <ErrorMessage>{err}</ErrorMessage>
         <LoginLabel>Password:</LoginLabel>
         {errors.password?.type === "required" && (
           <ErrorMessage role="alert">Enter password!</ErrorMessage>
